@@ -1,73 +1,57 @@
-const faker = require('faker');
+// const faker = require('faker');
 const boom = require('@hapi/boom');
-const getConnection = require('../libs/postgres');
+const { models } = require('../libs/sequelize');
 
 class UsersService {
 
-  constructor () {
-    this.users = [];
-    this.generateUsersDB();
-  }
+  // constructor () {
+  //   this.users = [];
+  //   this.generateUsersDB();
+  //   // this.pool = pool;
+  //   // this.pool.on('error', (err) => console.log(err));
+  // }
 
-  generateUsersDB() {
-    const limit = 100;
-    for (let index = 0; index < limit; index++) {
-      this.users.push({
-        id: faker.datatype.uuid(),
-        name: faker.name.firstName(),
-        job: faker.name.jobTitle(),
-        phone: faker.phone.phoneNumber(),
-      });
-    }
-  }
+  // generateUsersDB() {
+  //   const limit = 100;
+  //   for (let index = 0; index < limit; index++) {
+  //     this.users.push({
+  //       id: faker.datatype.uuid(),
+  //       name: faker.name.firstName(),
+  //       job: faker.name.jobTitle(),
+  //       phone: faker.phone.phoneNumber(),
+  //     });
+  //   }
+  // }
 
   async getUsers() {
-    const client = await getConnection();
-    const response = await client.query('SELECT * FROM tasks');
-    console.log(response);
-    return response.rows;
+    const response = await models.User.findAll();
+    return response;
   }
 
-  getUserById (id) {
-    const user = this.users.find(user => user.id === id);
+  async getUserById (id) {
+    const user = await models.User.findByPk(id);
     if (!user) {
       throw boom.notFound('User not found');
     }
     return user;
   }
 
-  createUser (data) {
-    const newUser = {
-      id: faker.datatype.uuid(),
-      ...data
-    }
-    this.users.push(newUser);
+  async createUser (data) {
+    const newUser = await models.User.create(data);
     return newUser;
   }
 
-  deleteUser (id) {
-    const index = this.users.findIndex(user => user.id === id);
-    if (index === -1) {
-      throw boom.notFound('User not found');
-    }
-    this.users.splice(index,1);
+  async updateUser (id, changes) {
+    const user = await this.getUserById(id);
+    const response = await user.update(changes);
+    return response;
+  }
+
+  async deleteUser (id) {
+    const user = await this.getUserById(id);
+    await user.destroy();
     return { id };
   }
-
-  updateUser (id, changes) {
-    const index = this.users.findIndex(user => user.id === id);
-    if (index === -1) {
-      throw boom.notFound('User not found');
-    }
-    const user = this.users[index];
-    this.users[index] = {
-      ...user,
-      ...changes
-    }
-
-    return this.users[index];
-  }
-
 }
 
 module.exports = UsersService;
