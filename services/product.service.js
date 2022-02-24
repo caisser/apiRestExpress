@@ -4,7 +4,6 @@ const boom = require('@hapi/boom');
 const { models } = require('../libs/sequelize');
 
 class ProductsService {
-
   // constructor(){
   //   this.products = [];
   //   this.generate();
@@ -28,14 +27,24 @@ class ProductsService {
     return newProduct;
   }
 
-  async find() {
-    const response = await models.Product.findAll();
+  async find(query) {
+    const options = {
+      include: ['category']
+    }
+    const { limit, offset } = query;
+    if(limit && offset){
+      options.limit = limit;
+      options.offset = offset;
+    }
+    const response = await models.Product.findAll(options);
     return response;
   }
 
   async findOne(id) {
-    const product = await models.Product.findByPk(id);
-    if (!product){
+    const product = await models.Product.findByPk(id, {
+      include: ['category'],
+    });
+    if (!product) {
       throw boom.notFound('Product not found');
     } else if (product.isBlocked) {
       throw boom.conflict('Product is blocked');
@@ -54,7 +63,6 @@ class ProductsService {
     await product.destroy();
     return { id };
   }
-
 }
 
 module.exports = ProductsService;

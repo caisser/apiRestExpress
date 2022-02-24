@@ -13,7 +13,7 @@ class CustomersService {
   async getCustomerById(id) {
     const customer = await models.Customer.findByPk(id, { include: ['user'] });
     if (!customer) {
-      throw boom.notFound('Product not found');
+      throw boom.notFound('Customer not found');
     }
     return customer;
   }
