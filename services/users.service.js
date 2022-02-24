@@ -1,6 +1,7 @@
 // const faker = require('faker');
 const boom = require('@hapi/boom');
 const { models } = require('../libs/sequelize');
+const bcrypt = require('bcrypt');
 
 class UsersService {
   // constructor () {
@@ -35,8 +36,25 @@ class UsersService {
     return user;
   }
 
+  async getUserByEmail(email) {
+    const user = await models.User.findOne({
+      where: {
+        email
+      }
+    });
+    if (!user) {
+      throw boom.notFound('User not found');
+    }
+    return user;
+  }
+
   async createUser(data) {
-    const newUser = await models.User.create(data);
+    const hash = await bcrypt.hash(data.password, 10);
+    const newUser = await models.User.create({
+      ...data,
+      password: hash,
+    });
+    delete newUser.dataValues.password;
     return newUser;
   }
 

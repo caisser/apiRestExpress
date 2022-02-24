@@ -1,6 +1,8 @@
 const express = require('express');
 const ProductsService = require('./../services/product.service');
 const validatorHandler = require('./../middleware/validator.handler');
+const checkApiKey = require('./../middleware/auth.handler');
+
 const {
   createProductSchema,
   updateProductSchema,
@@ -13,6 +15,7 @@ const productsService = new ProductsService();
 
 router.get(
   '/',
+  checkApiKey,
   validatorHandler(queryProductSchema, 'query'),
   async (req, res, next) => {
     try {

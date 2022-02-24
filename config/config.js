@@ -11,6 +11,7 @@ const config = {
   dbPort: process.env.DB_PORT,
   dbEngine: process.env.DB_ENGINE,
   dbUrl: process.env.DATABASE_URL,
+  apiKey: process.env.API_KEY
 };
 
 module.exports = { config };
