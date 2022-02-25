@@ -1,7 +1,7 @@
 const express = require('express');
 const ProductsService = require('./../services/product.service');
 const validatorHandler = require('./../middleware/validator.handler');
-const checkApiKey = require('./../middleware/auth.handler');
+const { checkApiKey } = require('./../middleware/auth.handler');
 
 const {
   createProductSchema,
