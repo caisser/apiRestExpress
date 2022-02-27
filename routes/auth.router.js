@@ -1,8 +1,10 @@
 const express = require('express');
 const passport = require('passport');
-const jwt = require('jsonwebtoken');
-const { jwtSecret } = require('../config/config').config;
+const AuthService = require('../services/auth.service');
+
 const router = express.Router();
+
+const authService = new AuthService();
 
 router.post(
   '/login',
@@ -10,20 +12,32 @@ router.post(
   async (req, res, next) => {
     try {
       const user = req.user;
-      const secret = jwtSecret;
-
-      const payload = {
-        sub: user.id,
-        role: user.role,
-      };
-
-      const token = jwt.sign(payload, secret);
-
+      const token = await authService.signToken(user);
       res.json({ user, token });
     } catch (error) {
       next(error);
     }
   }
 );
+
+router.post('/recovery', async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    await authService.sendRecoveryMail(email);
+    res.json({ message: 'Mail sent' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/change-password', async (req, res, next) => {
+  try {
+    const { token, newPassword } = req.body;
+    const response = await authService.changePassword(token, newPassword);
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;
