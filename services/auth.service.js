@@ -11,16 +11,13 @@ const userService = new UsersService();
 class AuthService {
   async getUser(email, password) {
     const user = await userService.getUserByEmail(email);
-    if (!user) {
-      throw boom.unauthorized();
-    }
-
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      throw boom.unauthorized();
+      throw boom.unauthorized('Wrong credentials');
     }
     delete user.dataValues.password;
+    delete user.dataValues.recoveryToken;
     return user;
   }
 
@@ -38,9 +35,6 @@ class AuthService {
 
   async sendRecoveryMail(email) {
     const user = await userService.getUserByEmail(email);
-    if (!user) {
-      throw boom.unauthorized();
-    }
 
     const payload = {
       sub: user.id,
@@ -59,7 +53,8 @@ class AuthService {
       html: `<b>Please enter to this link to reset your password: ${link}</b>`, // html body
     };
 
-    await this.sendEmail(mailInfo);
+    const response = await this.sendEmail(mailInfo);
+    return response;
   }
 
   async sendEmail(mailInfo) {
@@ -74,18 +69,22 @@ class AuthService {
     });
 
     await transporter.sendMail(mailInfo);
+    return 'Mail sent';
   }
 
   async changePassword(token, newPassword) {
     const payload = jwt.verify(token, config.jwtSecret);
     const user = await userService.getUserById(payload.sub);
     if (user.recoveryToken !== token) {
-      throw boom.unauthorized();
+      throw boom.unauthorized('You are not allowed to change the password');
     }
     const hash = await bcrypt.hash(newPassword, 10);
 
-    await userService.updateUser(user.id, { recoveryToken: null, password: hash });
-    return { message: 'Password Changed'}
+    await userService.updateUser(user.id, {
+      recoveryToken: null,
+      password: hash,
+    });
+    return { message: 'Password Changed' };
   }
 }
 

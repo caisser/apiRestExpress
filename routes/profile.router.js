@@ -5,9 +5,11 @@ const OrdersService = require('../services/orders.service');
 const router = express.Router();
 const service = new OrdersService();
 
+const { checkRoles, checkApiKey } = require('./../middleware/auth.handler');
 
 router.get(
   '/my-orders',
+  checkApiKey,
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
     try {

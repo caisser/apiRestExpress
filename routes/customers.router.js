@@ -1,22 +1,29 @@
 const express = require('express');
 const CustomersService = require('./../services/customers.service');
 const validatorHandler = require('./../middleware/validator.handler');
+
 const {
   createCustomerSchema,
   updateCustomerSchema,
   getCustomerSchema,
 } = require('./../schemas/customer.schema');
 
+const {
+  checkRoles,
+  checkApiKey,
+} = require('./../middleware/auth.handler');
+
 const router = express.Router();
 const customersServide = new CustomersService();
 
-router.get('/', async (req, res) => {
+router.get('/', checkApiKey, async (req, res) => {
   const customers = await customersServide.getCustomers();
   res.json(customers);
 });
 
 router.get(
   '/:id',
+  checkApiKey,
   validatorHandler(getCustomerSchema, 'params'),
   async (req, res, next) => {
     try {
@@ -31,6 +38,7 @@ router.get(
 
 router.post(
   '/',
+  checkApiKey,
   validatorHandler(createCustomerSchema, 'body'),
   async (req, res, next) => {
     try {
@@ -45,6 +53,7 @@ router.post(
 
 router.patch(
   '/:id',
+  checkApiKey,
   validatorHandler(getCustomerSchema, 'params'),
   validatorHandler(updateCustomerSchema, 'body'),
   async (req, res, next) => {
@@ -61,6 +70,7 @@ router.patch(
 
 router.delete(
   '/:id',
+  checkApiKey,
   validatorHandler(getCustomerSchema, 'params'),
   async (req, res, next) => {
     try {

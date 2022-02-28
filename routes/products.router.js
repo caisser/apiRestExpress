@@ -1,7 +1,7 @@
 const express = require('express');
 const ProductsService = require('./../services/product.service');
 const validatorHandler = require('./../middleware/validator.handler');
-const { checkApiKey } = require('./../middleware/auth.handler');
+const { checkRoles, checkApiKey } = require('./../middleware/auth.handler');
 
 const {
   createProductSchema,
@@ -27,12 +27,9 @@ router.get(
   }
 );
 
-router.get('/filter', (req, res) => {
-  res.send('Yo soy un filter');
-});
-
 router.get(
   '/:id',
+  checkApiKey,
   validatorHandler(getProductSchema, 'params'),
   async (req, res, next) => {
     try {
@@ -47,6 +44,7 @@ router.get(
 
 router.post(
   '/',
+  checkApiKey,
   validatorHandler(createProductSchema, 'body'),
   async (req, res, next) => {
     try {
@@ -61,6 +59,7 @@ router.post(
 
 router.patch(
   '/:id',
+  checkApiKey,
   validatorHandler(getProductSchema, 'params'),
   validatorHandler(updateProductSchema, 'body'),
   async (req, res, next) => {
@@ -77,6 +76,7 @@ router.patch(
 
 router.delete(
   '/:id',
+  checkApiKey,
   validatorHandler(getProductSchema, 'params'),
   async (req, res, next) => {
     try {

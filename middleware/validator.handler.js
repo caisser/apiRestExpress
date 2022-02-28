@@ -1,8 +1,7 @@
 const boom = require('@hapi/boom');
 
 //Middleware de forma dinamica
-function validatorHandler (schema, property) {
-
+function validatorHandler(schema, property) {
   return (req, res, next) => {
     const data = req[property];
 
@@ -13,9 +12,7 @@ function validatorHandler (schema, property) {
     }
 
     next();
-
-  }
-
+  };
 }
 
 module.exports = validatorHandler;

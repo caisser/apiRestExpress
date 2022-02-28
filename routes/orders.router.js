@@ -2,22 +2,26 @@ const express = require('express');
 
 const OrdersService = require('../services/orders.service');
 const validatorHandler = require('./../middleware/validator.handler');
+
 const {
   getOrderSchema,
   createOrderSchema,
-  addItemSchema
+  addItemSchema,
 } = require('../schemas/order.schema');
+
+const { checkRoles, checkApiKey } = require('./../middleware/auth.handler');
 
 const router = express.Router();
 const service = new OrdersService();
 
-router.get('/', async (req, res) => {
+router.get('/', checkApiKey, async (req, res) => {
   const orders = await service.find();
   res.json(orders);
 });
 
 router.get(
   '/:id',
+  checkApiKey,
   validatorHandler(getOrderSchema, 'params'),
   async (req, res, next) => {
     try {
@@ -32,6 +36,7 @@ router.get(
 
 router.post(
   '/',
+  checkApiKey,
   validatorHandler(createOrderSchema, 'body'),
   async (req, res, next) => {
     try {
@@ -46,6 +51,7 @@ router.post(
 
 router.post(
   '/add-item',
+  checkApiKey,
   validatorHandler(addItemSchema, 'body'),
   async (req, res, next) => {
     try {
