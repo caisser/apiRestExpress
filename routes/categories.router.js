@@ -55,6 +55,8 @@ router.post(
 router.patch(
   '/:id',
   checkApiKey,
+  passport.authenticate('jwt', { session: false }),
+  checkRoles('administrator'),
   validatorHandler(getCategorySchema, 'params'),
   validatorHandler(updateCategorySchema, 'body'),
   async (req, res, next) => {
@@ -72,6 +74,8 @@ router.patch(
 router.delete(
   '/:id',
   checkApiKey,
+  passport.authenticate('jwt', { session: false }),
+  checkRoles('administrator'),
   validatorHandler(getCategorySchema, 'params'),
   async (req, res, next) => {
     try {
